@@ -1,6 +1,8 @@
 #### Screenfetch for PowerShell
-#### Original Author Julian Chow ( https://github.com/JulianChow94 )
-#### Improvements by jantari ( https://github.com/jantari )
+#### by jantari ( https://github.com/jantari )
+#### Inspiration from Julian Chow ( https://github.com/JulianChow94 )
+#### ASCII artwork based on the one in WinScreeny by
+#### nijikokun ( https://github.com/nijikokun ) used with explicit permission
 
 # with [Environment]::NewLine you can create a newline on Windows AND Linux
 # this is a little tip as a thank you to anyone reading this source code
