@@ -7,3 +7,4 @@ PowerShell-based cross-platform 'screenfetch'-like tool
 2. Likewise I am currently only testing Linux compatibility on Ubuntu 16.04 and 17.04
 3. This is definitely very much a work in progress
 4. Requires [PowerShell](https://github.com/PowerShell/PowerShell "PowerShell GitHub page")
+5. The windows-flag ASCII artwork used in this script is based on nijikokun's in [WinScreeny](https://github.com/nijikokun/WinScreeny "WinScreeny GitHub page") that I used with explicit permission
