@@ -29,7 +29,7 @@ if ($unix) {
 ## Disk Information
 if ($unix) {
     $DiskInfo = df -hl | Where-Object { $_ -like '*rootfs*' } | Select-String '[\d]+.G' -AllMatches | % matches | % value
-    $UsedDiskPercent = df -hl | Where-Object { $_ -like '*rootfs*' } | Select-String '[\d]+.%' | % matches | % value
+    $UsedDiskPercent = df -hl | Where-Object { $_ -like 'rootfs*' } | Select-String '([\d]+)(?:%)' | ForEach-Object { $_.matches.groups[1].Value }
     $DiskSizeGB = $DiskInfo[0]
     $UsedDiskSizeGB = $DiskInfo[1]
 } else {
