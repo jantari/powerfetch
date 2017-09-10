@@ -9,10 +9,14 @@
 
 ####### Information Collection #########
 
-[bool]$linux = $false
+if ($PSVersionTable.Platform -eq 'Unix') {
+    [bool]$unix = $true
+} else {
+    [bool]$unix = $false
+}
 
 ## Uptime Information
-if ($linux) {
+if ($unix) {
     $uptimeHours = [int]((Get-Content /proc/uptime).Split(".")[0] / 60 / 60)
     $uptimeMinutes = [int]((Get-Content /proc/uptime).Split(".")[0] / 60 % 60)
 } else {
@@ -22,7 +26,7 @@ if ($linux) {
 }
 
 ## Disk Information
-if ($linux) {
+if ($unix) {
     $DiskInfo = df -hl | Where-Object { $_ -like '*rootfs*' } | Select-String '[\d]+.G' -AllMatches | % matches | % value
     $UsedDiskPercent = df -hl | Where-Object { $_ -like '*rootfs*' } | Select-String '[\d]+.%' | % matches | % value
     $DiskSizeGB = $DiskInfo[0]
@@ -35,25 +39,25 @@ if ($linux) {
 }
 
 ## Environment Information
-if ($linux) {$username = $env:USER} else {$username = $env:username}
-if (!$linux) {$gwmiWin32OS = Get-WmiObject Win32_OperatingSystem | Select-Object CSName,Caption,OSArchitecture,Version,FreePhysicalMemory}
-if ($linux) {$Machine = $env:NAME} else { $Machine = $gwmiWin32OS.CSName }
-if ($linux) {$OS = (lsb_release -d) -replace "Description:([\s]*)" } else {$OS = $gwmiWin32OS.Caption}
+if ($unix) {$username = $env:USER} else {$username = $env:username}
+if (!$unix) {$gwmiWin32OS = Get-WmiObject Win32_OperatingSystem | Select-Object CSName,Caption,OSArchitecture,Version,FreePhysicalMemory}
+if ($unix) {$Machine = $env:NAME} else { $Machine = $gwmiWin32OS.CSName }
+if ($unix) {$OS = (lsb_release -d) -replace "Description:([\s]*)" } else {$OS = $gwmiWin32OS.Caption}
 $BitVer = $gwmiWin32OS.OSArchitecture;
-if ($linux) {$Kernel = uname -sr} else {$Kernel = $env:OS +" "+ $gwmiWin32OS.Version}
+if ($unix) {$Kernel = uname -sr} else {$Kernel = $env:OS +" "+ $gwmiWin32OS.Version}
 $cmdlets = (Get-Command).Count
 
 ## Hardware Information
 
 # The following does not work on UNIX-Systems yet
-if (!$linux) {
+if (!$unix) {
     $Motherboard = Get-CimInstance Win32_BaseBoard | Select-Object Manufacturer, Product
     $GPU = (Get-WmiObject Win32_VideoController).Caption
     $display = Get-WmiObject Win32_VideoController | Select-Object CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate
 }
 
 # CPU
-if ($linux) {
+if ($unix) {
     $CPU = (Get-Content /proc/cpuinfo | Select-String "model name" | Select -ExpandProperty Line -First 1).Split(": ")[1]
 } else {
     $CPUObject = Get-WmiObject Win32_Processor | Select-Object Name, NumberOfCores, MaxClockSpeed
@@ -62,7 +66,7 @@ if ($linux) {
 }
 
 # RAM
-if ($linux) {
+if ($unix) {
     $ram = (Get-Content /proc/meminfo -First 2) | % { ($_ -replace "[\D]+") }
     $FreeRam = [int]($ram[1] / 1024)
     $TotalRam = [int]($ram[0] / 1024)
