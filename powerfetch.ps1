@@ -45,7 +45,7 @@ if (!$unix) {$gwmiWin32OS = Get-WmiObject Win32_OperatingSystem | Select-Object 
 if ($unix) {$Machine = $env:NAME} else { $Machine = $gwmiWin32OS.CSName }
 if ($unix) {$OS = (lsb_release -d) -replace "Description:([\s]*)" } else {$OS = $gwmiWin32OS.Caption}
 $BitVer = $gwmiWin32OS.OSArchitecture;
-if ($unix) {$Kernel = uname -sr} else {$Kernel = $env:OS +" "+ $gwmiWin32OS.Version}
+if ($unix) {$Kernel = uname -sr} else {$Kernel = "$env:OS $($gwmiWin32OS.Version)"}
 $cmdlets = (Get-Command).Count
 
 ## Hardware Information
@@ -53,13 +53,12 @@ $cmdlets = (Get-Command).Count
 # The following does not work on UNIX-Systems yet
 if (!$unix) {
     $Motherboard = Get-CimInstance Win32_BaseBoard | Select-Object Manufacturer, Product
-    $GPU = (Get-WmiObject Win32_VideoController).Caption
-    $display = Get-WmiObject Win32_VideoController | Select-Object CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate
+    $GPU = (Get-WmiObject Win32_VideoController | Where-Object { $_.AdapterRAM -ne $null }) | Select-Object Name, AdapterRAM, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate
 }
 
 # CPU
 if ($unix) {
-    $CPU = (Get-Content /proc/cpuinfo | Select-String "model name" | Select -ExpandProperty Line -First 1).Split(": ")[1]
+    $CPU = (Get-Content /proc/cpuinfo | Select-String "model name" | Select-Object -ExpandProperty Line -First 1).Split(": ")[1]
 } else {
     $CPUObject = Get-WmiObject Win32_Processor | Select-Object Name, NumberOfCores, MaxClockSpeed
     $CPU = $CPUObject.Name
@@ -68,7 +67,7 @@ if ($unix) {
 
 # RAM
 if ($unix) {
-    $ram = (Get-Content /proc/meminfo -First 2) | % { ($_ -replace "[\D]+") }
+    $ram = (Get-Content /proc/meminfo -First 2) | ForEach-Object { ($_ -replace "[\D]+") }
     $FreeRam = [int]($ram[1] / 1024)
     $TotalRam = [int]($ram[0] / 1024)
 } else {
@@ -177,13 +176,13 @@ Write-Output "$($art[5]) [91mShell:[0m PowerShell $($PSVersionTable.PSVersion)
 Write-Output "$($art[6]) [91mCmdlets:[0m $cmdlets"
 
 # Line 8 - Resolution (for primary monitor only)
-Write-Output "$($art[7]) [91mResolution:[0m$($display.CurrentHorizontalResolution) x$($display.CurrentVerticalResolution) @$($display.CurrentRefreshRate) Hz"
+Write-Output "$($art[7]) [91mResolution:[0m$($GPU.CurrentHorizontalResolution) x $($GPU.CurrentVerticalResolution) @ $($GPU.CurrentRefreshRate) Hz"
 
 # Line 9 - CPU
 Write-Output "$($art[8]) [91mCPU:[0m $CPU"
 
 # Line 10 - GPU
-Write-Output "$($art[9]) [91mGPU:[0m $GPU"
+Write-Output "$($art[9]) [91mGPU:[0m $($GPU.Name) ($($GPU.AdapterRAM / 1GB)GB VRAM)"
 
 # Line 11 - Ram
 Write-Output "$($art[10]) [91mRAM:[0m $UsedRam MB / $TotalRam MB ([92m$UsedRamPercent%[0m)"
