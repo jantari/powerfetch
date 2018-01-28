@@ -1,6 +1,8 @@
 # powerfetch
 PowerShell-based cross-platform 'screenfetch'-like tool
 
+![Alt text](screenshot.png?raw=true "sample Windows screenshot")
+
 ### About
 
 1. This script is made for Windows 10 v1703 and newer, I don't test it on old Windows versions
