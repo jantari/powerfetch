@@ -18,17 +18,17 @@ if ($PSVersionTable.Platform -eq 'Unix') {
 
 ## Uptime Information
 if ($unix) {
-    $uptimeHours = [int]((Get-Content /proc/uptime).Split(".")[0] / 60 / 60)
-    $uptimeMinutes = [int]((Get-Content /proc/uptime).Split(".")[0] / 60 % 60)
+    $uptimeHours = [int]((Get-Content -Path "/proc/uptime").Split(".")[0] / 60 / 60)
+    $uptimeMinutes = [int]((Get-Content -Path "/proc/uptime").Split(".")[0] / 60 % 60)
 } else {
-    $uptime = ([DateTime]::Now - (Get-WmiObject Win32_OperatingSystem).ConvertToDateTime((Get-WmiObject Win32_OperatingSystem).LastBootUpTime))
-    $uptimeHours = $uptime.Hours
+    $uptime = [DateTime]::Now - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
+    $uptimeHours = $uptime.Hours + ($uptime.Days * 24)
     $uptimeMinutes = $uptime.Minutes
 }
 
 ## Disk Information
 if ($unix) {
-    $DiskInfo = df -hl | Where-Object { $_ -like 'rootfs*' } | Select-String '([\d]+)(?:G)' -AllMatches | % matches | % { $_.groups[1].Value }
+    $DiskInfo = df -hl | Where-Object { $_ -like 'rootfs*' } | Select-String '([\d]+)(?:G)' -AllMatches | ForEach-Object matches | ForEach-Object { $_.groups[1].Value }
     $UsedDiskPercent = df -hl | Where-Object { $_ -like 'rootfs*' } | Select-String '([\d]+)(?:%)' | ForEach-Object { $_.matches.groups[1].Value }
     $DiskSizeGB = $DiskInfo[0]
     $UsedDiskSizeGB = $DiskInfo[1]
@@ -41,7 +41,7 @@ if ($unix) {
 
 ## Environment Information
 if ($unix) {$username = $env:USER} else {$username = $env:username}
-if (!$unix) {$gwmiWin32OS = Get-WmiObject Win32_OperatingSystem | Select-Object CSName,Caption,OSArchitecture,Version,FreePhysicalMemory}
+if (!$unix) {$gwmiWin32OS = Get-CimInstance Win32_OperatingSystem | Select-Object CSName,Caption,OSArchitecture,Version,FreePhysicalMemory}
 if ($unix) {$Machine = $env:NAME} else { $Machine = $gwmiWin32OS.CSName }
 if ($unix) {$OS = (lsb_release -d) -replace "Description:([\s]*)" } else {$OS = $gwmiWin32OS.Caption}
 $BitVer = $gwmiWin32OS.OSArchitecture;
@@ -53,14 +53,14 @@ $cmdlets = (Get-Command).Count
 # The following does not work on UNIX-Systems yet
 if (!$unix) {
     $Motherboard = Get-CimInstance Win32_BaseBoard | Select-Object Manufacturer, Product
-    $GPU = (Get-WmiObject Win32_VideoController | Where-Object { $_.AdapterRAM -ne $null }) | Select-Object Name, AdapterRAM, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate
+    $GPU = (Get-CimInstance Win32_VideoController | Where-Object { $_.AdapterRAM -ne $null }) | Select-Object Name, AdapterRAM, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate
 }
 
 # CPU
 if ($unix) {
     $CPU = (Get-Content /proc/cpuinfo | Select-String "model name" | Select-Object -ExpandProperty Line -First 1).Split(": ")[1]
 } else {
-    $CPUObject = Get-WmiObject Win32_Processor | Select-Object Name, NumberOfCores, MaxClockSpeed
+    $CPUObject = Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, MaxClockSpeed
     $CPU = $CPUObject.Name
     $CPU = $CPU.Split("@")[0] + " @ " + $CPUObject.NumberOfCores + "x " + ($CPUObject.MaxClockSpeed / 1000 ) + " Ghz";
 }
@@ -72,7 +72,7 @@ if ($unix) {
     $TotalRam = [int]($ram[0] / 1024)
 } else {
     $FreeRam = ([math]::Truncate($gwmiWin32OS.FreePhysicalMemory / 1KB));
-    $TotalRam = ([math]::Truncate((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory / 1MB));
+    $TotalRam = ([math]::Truncate((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1MB));
 }
 $UsedRam = $TotalRam - $FreeRam;
 $FreeRamPercent = ($FreeRam / $TotalRam) * 100;
