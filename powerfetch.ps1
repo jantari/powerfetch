@@ -33,9 +33,9 @@ if ($unix) {
     $DiskSizeGB = $DiskInfo[0]
     $UsedDiskSizeGB = $DiskInfo[1]
 } else {
-    $DiskInfo = Get-PSDrive $env:Systemdrive.Substring(0,1) | Select-Object Used, Free
-    $UsedDiskSizeGB = [math]::round($DiskInfo.Used / 1GB)
-    $DiskSizeGB = [math]::round(($DiskInfo.Used + $DiskInfo.Free) / 1GB)
+    $DiskInfo = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID like '$env:systemdrive'" | Select-Object Size, FreeSpace
+    $UsedDiskSizeGB = [math]::round(($DiskInfo.Size - $DiskInfo.FreeSpace) / 1GB)
+    $DiskSizeGB = [math]::round(($DiskInfo.Size) / 1GB)
     $UsedDiskPercent = "{0:N0}" -f (($UsedDiskSizeGB / $DiskSizeGB) * 100);
 }
 
