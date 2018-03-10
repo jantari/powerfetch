@@ -3,10 +3,19 @@ PowerShell-based cross-platform 'screenfetch'-like tool
 
 ![Alt text](screenshot.png?raw=true "sample Windows screenshot")
 
+### Permanent installation (Windows only)
+
+To use `powerfetch` anywhere and without the script file, you can run:
+
+```
+./powerfetch.ps! -install
+```
+
+This will add `powerfetch` as a function to your PowerShell profile file.
+
 ### About
 
-1. This script is made for Windows 10 v1703 and newer, I don't test it on old Windows versions
-2. Likewise I am currently only testing Linux compatibility on Ubuntu 16.04 and 17.04
-3. The macOS and Linux compatibility is definitely very much still work in progress
-4. Requires [PowerShell](https://github.com/PowerShell/PowerShell "PowerShell GitHub page")
-5. The windows-flag ASCII artwork used in this script is based on nijikokun's in [WinScreeny](https://github.com/nijikokun/WinScreeny "WinScreeny GitHub page") that I used with explicit permission
+1. This script requires at least Windows 10 v1703 to display correctly
+2. The macOS and Linux compatibility is definitely very much still work in progress
+3. Requires [PowerShell](https://github.com/PowerShell/PowerShell "PowerShell GitHub page")
+4. The windows-flag ASCII artwork used in this script is based on nijikokun's in [WinScreeny](https://github.com/nijikokun/WinScreeny "WinScreeny GitHub page") that I used with explicit permission

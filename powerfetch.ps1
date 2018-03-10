@@ -1,10 +1,27 @@
-#### Screenfetch for PowerShell
-#### by jantari ( https://github.com/jantari )
-#### Inspiration from Julian Chow ( https://github.com/JulianChow94 )
-#### windows-flag ASCII artwork based on the one in WinScreeny by
-#### nijikokun ( https://github.com/nijikokun ) used with explicit permission
-#### tux ASCII artwork from http://ascii.co.uk/art/tux
+<#
+    .SYNOPSIS
+    Presents system information in a visually appealing, human-readable way.
 
+    .DESCRIPTION
+    Presents system information in a visually appealing, human-readable way.
+
+    .PARAMETER install
+    Adds this script to tthe users PowerShell profile as a function.
+
+    .NOTES
+    Author: jantari ( https://github.com/jantari )
+    Repo: https://github.com/jantari/powerfetch
+    Credits: Inspiration to make this from Julian Chow ( https://github.com/JulianChow94 ).
+             Windows-flag ASCII artwork based on the one in WinScreeny by
+             nijikokun ( https://github.com/nijikokun ) used with explicit permission.
+             Tux ASCII artwork from http://ascii.co.uk/art/tux .
+#>
+
+Param (
+    [switch]$install
+)
+
+[scriptblock]$powerfetch = {
 ####### Information Collection #########
 
 if ($PSVersionTable.Platform -eq 'Unix') {
@@ -192,3 +209,16 @@ Write-Output $art[12]
 Write-Output $art[13]
 Write-Output $art[14]
 Write-Output $art[15]
+
+}
+
+if ($install) {
+    if (-not (Test-Path $PROFILE)) {
+        New-Item -Path $PROFILE -ItemType File | Out-Null
+    }
+    Add-Content -Path $PROFILE -Value 'function powerfetch {'
+    Add-Content -Path $PROFILE -Value $powerfetch
+    Add-Content -Path $PROFILE -Value '}'
+} else {
+    Invoke-Command -ScriptBlock $powerfetch
+}
