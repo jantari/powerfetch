@@ -5,9 +5,6 @@
 #### nijikokun ( https://github.com/nijikokun ) used with explicit permission
 #### tux ASCII artwork from http://ascii.co.uk/art/tux
 
-# with [Environment]::NewLine you can create a newline on Windows AND Linux
-# this is a little tip as a thank you to anyone reading this source code
-
 ####### Information Collection #########
 
 if ($PSVersionTable.Platform -eq 'Unix') {
@@ -21,7 +18,8 @@ if ($unix) {
     $uptimeHours = [int]((Get-Content -Path "/proc/uptime").Split(".")[0] / 60 / 60)
     $uptimeMinutes = [int]((Get-Content -Path "/proc/uptime").Split(".")[0] / 60 % 60)
 } else {
-    $uptime = [DateTime]::Now - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
+    $gcimWin32OS = Get-CimInstance Win32_OperatingSystem | Select-Object CSName, Caption, OSArchitecture, Version, FreePhysicalMemory, LastBootUpTime
+    $uptime = [DateTime]::Now - $gcimWin32OS.LastBootUpTime
     $uptimeHours = $uptime.Hours + ($uptime.Days * 24)
     $uptimeMinutes = $uptime.Minutes
 }
@@ -40,12 +38,11 @@ if ($unix) {
 }
 
 ## Environment Information
-if ($unix) {$username = $env:USER} else {$username = $env:username}
-if (!$unix) {$gwmiWin32OS = Get-CimInstance Win32_OperatingSystem | Select-Object CSName,Caption,OSArchitecture,Version,FreePhysicalMemory}
-if ($unix) {$Machine = $env:NAME} else { $Machine = $gwmiWin32OS.CSName }
-if ($unix) {$OS = (lsb_release -d) -replace "Description:([\s]*)" } else {$OS = $gwmiWin32OS.Caption}
-$BitVer = $gwmiWin32OS.OSArchitecture;
-if ($unix) {$Kernel = uname -sr} else {$Kernel = "$env:OS $($gwmiWin32OS.Version)"}
+if ($unix) { $username = $env:USER} else {$username = $env:username }
+if ($unix) { $Machine = $env:NAME } else { $Machine = $gcimWin32OS.CSName }
+if ($unix) { $OS = (lsb_release -d) -replace "Description:([\s]*)" } else { $OS = $gcimWin32OS.Caption }
+$BitVer = $gcimWin32OS.OSArchitecture;
+if ($unix) { $Kernel = uname -sr } else {$Kernel = "$env:OS $($gcimWin32OS.Version)" }
 $cmdlets = (Get-Command).Count
 
 ## Hardware Information
@@ -62,7 +59,7 @@ if ($unix) {
 } else {
     $CPUObject = Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, MaxClockSpeed
     $CPU = $CPUObject.Name
-    $CPU = $CPU.Split("@")[0] + " @ " + $CPUObject.NumberOfCores + "x " + ($CPUObject.MaxClockSpeed / 1000 ) + " Ghz";
+    $CPU = ($CPU -split " @")[0] + " @ " + $CPUObject.NumberOfCores + "x " + ($CPUObject.MaxClockSpeed / 1000 ) + " Ghz";
 }
 
 # RAM
@@ -71,7 +68,7 @@ if ($unix) {
     $FreeRam = [int]($ram[1] / 1024)
     $TotalRam = [int]($ram[0] / 1024)
 } else {
-    $FreeRam = ([math]::Truncate($gwmiWin32OS.FreePhysicalMemory / 1KB));
+    $FreeRam = ([math]::Truncate($gcimWin32OS.FreePhysicalMemory / 1KB));
     $TotalRam = ([math]::Truncate((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1MB));
 }
 $UsedRam = $TotalRam - $FreeRam;
