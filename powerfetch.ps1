@@ -214,7 +214,7 @@ Write-Output $art[15]
 
 if ($install) {
     if (-not (Test-Path $PROFILE)) {
-        New-Item -Path $PROFILE -ItemType File | Out-Null
+        New-Item -Path $PROFILE -ItemType File -Force | Out-Null
     }
     Add-Content -Path $PROFILE -Value 'function powerfetch {'
     Add-Content -Path $PROFILE -Value $powerfetch
