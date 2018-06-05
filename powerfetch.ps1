@@ -18,7 +18,8 @@
 #>
 
 Param (
-    [switch]$install
+    [switch]$Install,
+    [switch]$Colors
 )
 
 [scriptblock]$powerfetch = {
@@ -67,7 +68,7 @@ $cmdlets = (Get-Command).Count
 # The following does not work on UNIX-Systems yet
 if (!$unix) {
     $Motherboard = Get-CimInstance Win32_BaseBoard | Select-Object Manufacturer, Product
-    $GPU = (Get-CimInstance Win32_VideoController | Where-Object { $_.AdapterRAM -ne $null }) | Select-Object Name, AdapterRAM, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate
+    $GPU = (Get-CimInstance CIM_VideoController | Where-Object { $_.AdapterRAM -ne $null }) | Select-Object Name, AdapterRAM, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate
 }
 
 # CPU
@@ -159,7 +160,7 @@ _)      \.___.,|     .'
 '@, @'
  [94m@P*''``''*4Qj[0m [93m;EEEEEtttttttZ`[0m          
 '@, @'
-            [94m`[0m  [93mEEEEEtttttttj7[0m            
+            [94m`[0m  [93mEEEEEtttttttj7[0m           
 '@, @'
                [93m`^VEtjjjz>*`[0m          
 '@
@@ -196,7 +197,7 @@ Write-Output "$($art[7]) [91mResolution:[0m$($GPU.CurrentHorizontalResolution)
 Write-Output "$($art[8]) [91mCPU:[0m $CPU"
 
 # Line 10 - GPU
-Write-Output "$($art[9]) [91mGPU:[0m $($GPU.Name) ($($GPU.AdapterRAM / 1GB)GB VRAM)"
+Write-Output "$($art[9]) [91mGPU:[0m $($GPU.Name) ($("{0:F2}" -f ($GPU.AdapterRAM / 1GB))GB VRAM)"
 
 # Line 11 - Ram
 Write-Output "$($art[10]) [91mRAM:[0m $UsedRam MB / $TotalRam MB ([92m$UsedRamPercent%[0m)"
@@ -206,8 +207,22 @@ Write-Output "$($art[11]) [91mDisk:[0m $UsedDiskSizeGB GB / $DiskSizeGB GB ([
 
 # Empty Lines
 Write-Output $art[12]
-Write-Output $art[13]
-Write-Output $art[14]
+
+if (!$unix -and $colors) {
+    foreach ($i in 40..48 + 100..107) {
+        [string]$sec = '[' + $i + 'm'
+        if ($i -eq 48) {
+            Write-Output "$($art[13]) $conColorLine"
+            $conColorLine = ''
+        } else {
+            $conColorLine += '' + $sec + '      [0m'
+        }
+    }
+    Write-Output "$($art[14]) $conColorLine"
+} else {
+    Write-Output $art[13]
+    Write-Output $art[14]
+}
 Write-Output $art[15]
 
 }
