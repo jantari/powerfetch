@@ -22,8 +22,12 @@ Param (
     [switch]$Colors
 )
 
-[scriptblock]$powerfetch = {
-####### Information Collection #########
+function powerfetch {
+    Param (
+        [switch]$Colors
+    )
+    
+###### Information Collection #########
 
 if ($PSVersionTable.Platform -eq 'Unix') {
     [bool]$unix = $true
@@ -75,7 +79,7 @@ if (!$unix) {
 if ($unix) {
     $CPU = (Get-Content /proc/cpuinfo | Select-String "model name" | Select-Object -ExpandProperty Line -First 1).Split(": ")[1]
 } else {
-    $CPUObject = Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, MaxClockSpeed
+    $CPUObject = ([wmisearcher]("SELECT Name, NumberOfCores, MaxClockSpeed FROM Win32_Processor")).Get()
     $CPU = $CPUObject.Name
     $CPU = ($CPU -split " @")[0] + " @ " + $CPUObject.NumberOfCores + "x " + ($CPUObject.MaxClockSpeed / 1000 ) + " Ghz";
 }
@@ -150,17 +154,17 @@ _)      \.___.,|     .'
 '@, @'
    [94m;t::::ztttt33)[0m [93m.[0m [92m*4EEEjjjiP*[0m        
 '@, @'
-  [94m:tt::::ttttt33[0m [93m:Z3:..[0m  [92m``[0m [93m,,g[0m        
+  [94m:tt::::ttttt33[0m [93m:E3s..[0m  [92m``[0m [93m,,g[0m        
 '@, @'
   [94mit::::ztttt33F[0m [93mAEEEEEtttttE3F[0m        
 '@, @'
  [94m;t:::::tttt33V[0m [93m;EEEEEttttttt3[0m         
 '@, @'
- [94mEt::::ztttt337[0m [93m@EEEEttttttt3F[0m          
+ [94mft::::ztttt337[0m [93m@EEEEttttttt3F[0m          
 '@, @'
  [94m@P*''``''*4Qj[0m [93m;EEEEEtttttttZ`[0m          
 '@, @'
-            [94m`[0m  [93mEEEEEtttttttj7[0m           
+             [94m`[0m [93mEEEEEtttttttj7[0m           
 '@, @'
                [93m`^VEtjjjz>*`[0m          
 '@
@@ -191,7 +195,7 @@ Write-Output "$($art[5]) [91mShell:[0m PowerShell $($PSVersionTable.PSVersion)
 Write-Output "$($art[6]) [91mCmdlets:[0m $cmdlets"
 
 # Line 8 - Resolution (for primary monitor only)
-Write-Output "$($art[7]) [91mResolution:[0m$($GPU.CurrentHorizontalResolution) x $($GPU.CurrentVerticalResolution) @ $($GPU.CurrentRefreshRate) Hz"
+Write-Output "$($art[7]) [91mResolution:[0m $($GPU.CurrentHorizontalResolution) x $($GPU.CurrentVerticalResolution) @ $($GPU.CurrentRefreshRate) Hz"
 
 # Line 9 - CPU
 Write-Output "$($art[8]) [91mCPU:[0m $CPU"
@@ -208,7 +212,7 @@ Write-Output "$($art[11]) [91mDisk:[0m $UsedDiskSizeGB GB / $DiskSizeGB GB ([
 # Empty Lines
 Write-Output $art[12]
 
-if (!$unix -and $colors) {
+if (!$unix -and $Colors) {
     foreach ($i in 40..48 + 100..107) {
         [string]$sec = '[' + $i + 'm'
         if ($i -eq 48) {
@@ -232,8 +236,8 @@ if ($install) {
         New-Item -Path $PROFILE -ItemType File -Force | Out-Null
     }
     Add-Content -Path $PROFILE -Value 'function powerfetch {'
-    Add-Content -Path $PROFILE -Value $powerfetch
+    Add-Content -Path $PROFILE -Value (Get-Item Function:\powerfetch).Definition
     Add-Content -Path $PROFILE -Value '}'
 } else {
-    Invoke-Command -ScriptBlock $powerfetch
+    powerfetch -Colors:$Colors
 }
