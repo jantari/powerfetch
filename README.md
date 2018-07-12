@@ -8,7 +8,7 @@ PowerShell-based cross-platform 'screenfetch'-like tool
 To use `powerfetch` anywhere and without the script file, you can run:
 
 ```
-./powerfetch.ps! -install
+./powerfetch.ps1 -Install
 ```
 
 This will add `powerfetch` as a function to your PowerShell profile file.
