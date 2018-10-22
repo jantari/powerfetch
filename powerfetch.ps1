@@ -80,8 +80,7 @@ if ($unix) {
     $CPU = (Get-Content /proc/cpuinfo | Select-String "model name" | Select-Object -ExpandProperty Line -First 1).Split(": ")[1]
 } else {
     $CPUObject = ([wmisearcher]("SELECT Name, NumberOfCores, MaxClockSpeed FROM Win32_Processor")).Get()
-    $CPU = $CPUObject.Name
-    $CPU = ($CPU -split " @")[0] + " @ " + $CPUObject.NumberOfCores + "x " + ($CPUObject.MaxClockSpeed / 1000 ) + " Ghz";
+    $CPU = ($CPUObject.Name -split " @")[0].Trim() + " @ " + $CPUObject.NumberOfCores + "x " + ($CPUObject.MaxClockSpeed / 1000 ) + " Ghz";
 }
 
 # RAM
