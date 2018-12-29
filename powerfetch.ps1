@@ -49,10 +49,8 @@ if ($unix) {
 
 ## Disk Information
 if ($unix) {
-    $DiskInfo = df -hl | Where-Object { $_ -like 'rootfs*' } | Select-String '([\d]+)(?:G)' -AllMatches | ForEach-Object matches | ForEach-Object { $_.groups[1].Value }
-    $UsedDiskPercent = df -hl | Where-Object { $_ -like 'rootfs*' } | Select-String '([\d]+)(?:%)' | ForEach-Object { $_.matches.groups[1].Value }
-    $DiskSizeGB = $DiskInfo[0]
-    $UsedDiskSizeGB = $DiskInfo[1]
+    $diskInfo = (lsblk --json -p -b | ConvertFrom-Json).blockdevices | Where-Object { $_.type -eq 'disk' }
+    $DiskSizeGB = "{0:#.##}" -f ($diskInfo.size / 1GB)
 } else {
     $DiskInfo = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID like '$env:systemdrive'" | Select-Object Size, FreeSpace
     $UsedDiskSizeGB = [math]::round(($DiskInfo.Size - $DiskInfo.FreeSpace) / 1GB)
@@ -62,7 +60,7 @@ if ($unix) {
 
 ## Environment Information
 if ($unix) { $username = $env:USER} else {$username = $env:username }
-if ($unix) { $Machine = $env:NAME } else { $Machine = $gcimWin32OS.CSName }
+$Machine = hostname
 if ($unix) { $OS = (lsb_release -d) -replace "Description:([\s]*)" } else { $OS = $gcimWin32OS.Caption }
 $BitVer = $gcimWin32OS.OSArchitecture;
 if ($unix) { $Kernel = uname -sr } else {$Kernel = "$env:OS $($gcimWin32OS.Version)" }
