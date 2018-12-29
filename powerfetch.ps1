@@ -37,8 +37,9 @@ if ($PSVersionTable.Platform -eq 'Unix') {
 
 ## Uptime Information
 if ($unix) {
-    $uptimeHours = [int]((Get-Content -Path "/proc/uptime").Split(".")[0] / 60 / 60)
-    $uptimeMinutes = [int]((Get-Content -Path "/proc/uptime").Split(".")[0] / 60 % 60)
+    $uptime = Get-Uptime
+    $uptimeHours = $uptime.Hours + ($uptime.Days * 24)
+    $uptimeMinutes = $uptime.Minutes
 } else {
     $gcimWin32OS = Get-CimInstance Win32_OperatingSystem | Select-Object CSName, Caption, OSArchitecture, Version, FreePhysicalMemory, LastBootUpTime
     $uptime = [DateTime]::Now - $gcimWin32OS.LastBootUpTime
