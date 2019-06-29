@@ -3,15 +3,15 @@ PowerShell-based cross-platform 'screenfetch'-like tool
 
 ![Alt text](screenshot.png?raw=true "sample Windows screenshot")
 
-### Permanent installation (Windows only)
+### Try it out!
 
-To use `powerfetch` anywhere and without the script file, you can run:
+To try `powerfetch` anywhere and without downloading, you can run:
 
+```powershell
+iex (iwr 'https://raw.githubusercontent.com/jantari/powerfetch/master/powerfetch.ps1').Content
 ```
-./powerfetch.ps1 -Install
-```
 
-This will add `powerfetch` as a function to your PowerShell profile file.
+This will run the script directly from this GitHub. 
 
 ### About
 
