@@ -46,10 +46,18 @@ if ($unix) {
     [array]$diskInfo = $diskInfo | Format-Table -Property name, @{'Name' = 'sizegb'; Expression = { "$($_.size / 1GB) GB" }} -HideTableHeaders | Out-String -NoNewline
 } else {
     $DiskInfo        = Get-CimInstance -ClassName Win32_LogicalDisk -Filter 'DriveType = 3'
-    $diskinfo        = ($DiskInfo | Format-Table Name,
-        @{'Name' = 'Size'; Expression = { "$([Math]::Round( ($_.Size - $_.FreeSpace) / 1GB)) / $([Math]::Round($_.Size / 1GB)) GB" }},
-        @{'Name' = 'Perc'; Expression = {"({0:N0}%)" -f (100 - ($_.FreeSpace / $_.Size) * 100) }
-    } -HideTableHeaders | Out-String).Trim() -split [System.Environment]::NewLine
+    $diskinfo        = foreach ($disk in $diskInfo) {
+        [pscustomobject]@{
+         'Name' = $disk.Name
+         'Size' = "$([Math]::Round( ($disk.Size - $disk.FreeSpace) / 1GB)) / $([Math]::Round($disk.Size / 1GB)) GB"
+         'Perc' = switch ([Math]::Round(100 - ($disk.FreeSpace / $disk.Size) * 100)) {
+                { $_ -gt 90 } { "([91m$_%[0m)"; break }
+                { $_ -gt 70 } { "([93m$_%[0m)"        }
+                default       { "([92m$_%[0m)"        }
+            }
+        }
+    }
+    $diskInfo = ($diskInfo | Format-Table Name, @{'Name' = 'Size'; 'Expression' = {$_.Size}; Align = 'Right'}, Perc -HideTableHeaders | Out-String).Trim() -split [System.Environment]::NewLine
     <#
     $UsedDiskSizeGB  = [math]::round(($DiskInfo.Size - $DiskInfo.FreeSpace) / 1GB)
     $DiskSizeGB      = [math]::round(($DiskInfo.Size) / 1GB)
