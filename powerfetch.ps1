@@ -86,16 +86,26 @@ $cmdlets = (Get-Command).Count
 
 # The following does not work on UNIX-Systems yet
 if (!$unix) {
-    $Motherboard = Get-CimInstance Win32_BaseBoard | Select-Object Manufacturer, Product
-    $GPU         = (Get-CimInstance CIM_VideoController | Where-Object { $null -ne $_.AdapterRAM }) | Select-Object Name, AdapterRAM, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate
+    $Motherboard  = Get-CimInstance Win32_BaseBoard | Select-Object Manufacturer, Product
+    $GPU          = (Get-CimInstance CIM_VideoController | Where-Object { $null -ne $_.AdapterRAM }) | Select-Object Name, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate
+    $Monitors     = Get-CimInstance -Query "select UserFriendlyName, UserFriendlyNameLength from WmiMonitorID" -Namespace root/wmi
+    $MonitorNames = foreach ($monitor in $Monitors) { [System.Text.Encoding]::UTF8.GetString($monitor.UserFriendlyName, 0, $monitor.UserFriendlyNameLength) }
 }
 
 # CPU
 if ($unix) {
     $CPU = (Get-Content /proc/cpuinfo | Select-String "model name" | Select-Object -ExpandProperty Line -First 1).Split(": ")[1]
 } else {
-    $CPUObject = ([wmisearcher]("SELECT Name, NumberOfCores, MaxClockSpeed FROM Win32_Processor")).Get()
-    $CPU       = ($CPUObject.Name -split " @")[0].Trim() + " @ " + $CPUObject.NumberOfCores + "x " + ($CPUObject.MaxClockSpeed / 1000 ) + " Ghz";
+    [array]$CPUObject = ([wmisearcher]("SELECT Name, NumberOfCores, MaxClockSpeed FROM Win32_Processor")).Get()
+    if ($CPUObject.Count -gt 1) {
+        if (@($CPUObject | Select-Object -Unique).Count -gt 1) {
+            $CPU = "$($CPUObject.Count) different"
+        } else {
+            $CPU = "$($CPUObject.Count) x " + $CPUObject[0].Name -replace '(\s+)?@.*' + ' @ ' + $CPUObject[0].NumberOfCores + 'x ' + ($CPUObject[0].MaxClockSpeed / 1000 ) + " Ghz"
+        }
+    } else {
+        $CPU = $CPUObject.Name -replace '(\s+)?@.*' + " @ " + $CPUObject.NumberOfCores + "x " + ($CPUObject.MaxClockSpeed / 1000 ) + " Ghz"
+    }
 }
 
 # RAM
@@ -230,13 +240,13 @@ Write-Output "$($art[5]) [91mShell:[0m PowerShell $($PSVersionTable.PSVersion)
 Write-Output "$($art[6]) [91mCmdlets:[0m $cmdlets"
 
 # Line 8 - Resolution (for primary monitor only)
-Write-Output "$($art[7]) [91mResolution:[0m $($GPU.CurrentHorizontalResolution) x $($GPU.CurrentVerticalResolution) @ $($GPU.CurrentRefreshRate) Hz"
+Write-Output "$($art[7]) [91mDisplay:[0m $MonitorNames ($($GPU.CurrentHorizontalResolution) x $($GPU.CurrentVerticalResolution) @ $($GPU.CurrentRefreshRate) Hz)"
 
 # Line 9 - CPU
 Write-Output "$($art[8]) [91mCPU:[0m $CPU"
 
 # Line 10 - GPU
-Write-Output "$($art[9]) [91mGPU:[0m $($GPU.Name) ($("{0:F2}" -f ($GPU.AdapterRAM / 1GB))GB VRAM)"
+Write-Output "$($art[9]) [91mGPU:[0m $($GPU.Name)"
 
 # Line 11 - Ram
 Write-Output "$($art[10]) [91mRAM:[0m $UsedRam MB / $TotalRam MB ([92m$UsedRamPercent%[0m)"
