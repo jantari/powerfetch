@@ -88,8 +88,14 @@ $cmdlets = (Get-Command).Count
 if (!$unix) {
     $Motherboard  = Get-CimInstance Win32_BaseBoard | Select-Object Manufacturer, Product
     $GPU          = (Get-CimInstance CIM_VideoController | Where-Object { $null -ne $_.AdapterRAM }) | Select-Object Name, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate
-    $Monitors     = Get-CimInstance -Query "select UserFriendlyName, UserFriendlyNameLength from WmiMonitorID" -Namespace root/wmi
-    $MonitorNames = foreach ($monitor in $Monitors) { [System.Text.Encoding]::UTF8.GetString($monitor.UserFriendlyName, 0, $monitor.UserFriendlyNameLength) }
+    $Monitors     = Get-CimInstance -Query "Select UserFriendlyName, UserFriendlyNameLength, ManufacturerName, ProductCodeID from WmiMonitorID" -Namespace root/wmi
+    $MonitorNames = foreach ($monitor in $Monitors) {
+        if ($monitor.UserFriendlyName) {
+            [System.Text.Encoding]::UTF8.GetString($monitor.UserFriendlyName, 0, $monitor.UserFriendlyNameLength)
+        } else {
+            [System.Text.Encoding]::UTF8.GetString($monitor.ManufacturerName, 0, $monitor.ManufacturerName.Length)
+        }
+    }
 }
 
 # CPU
