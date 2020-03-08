@@ -8,7 +8,7 @@ PowerShell-based cross-platform 'screenfetch'-like tool
 To try `powerfetch` anywhere and without downloading, you can run:
 
 ```powershell
-iex (iwr 'https://raw.githubusercontent.com/jantari/powerfetch/master/powerfetch.ps1').Content
+iex (new-object net.webclient).DownloadString('https://raw.githubusercontent.com/jantari/powerfetch/master/powerfetch.ps1')
 ```
 
 This will run the script directly from this GitHub. 
