@@ -20,6 +20,19 @@
 Param (
     [switch]$Colors
 )
+
+###### Chia
+$error.clear()
+$null = Get-Command cdv -ErrorAction Ignore
+if ($error.Count -eq 0) {
+    $chia_version = chia version
+    $cdv_version = cdv --version | % { $_ -replace "cdv, version ", "" }
+    # Write-Host "chia version: $chia_version"
+}
+else {
+    $chia_version = "n/a"
+    # Write-Host "chia executable not found"
+}
     
 ###### Information Collection #########
 
@@ -130,75 +143,75 @@ $UsedRamPercent = ($UsedRam / $TotalRam) * 100;
 $UsedRamPercent = "{0:N0}" -f $UsedRamPercent;
 
 ## Array with ASCII art
-if ($unix) {
-    [string[]]$art = @'
-          _nnnn_         
-'@, @'
-         dGGGGMMb        
-'@, @'
-        @p~qp~~qMb       
-'@, @'
-        M|O||O) M|       
-'@, @'
-        @,----.JM|       
-'@, @'
-       JS^\__/  qKL      
-'@, @'
-     dZP        qKRb     
-'@, @'
-    dZP          qKKb    
-'@, @'
-   fZP            SMMb   
-'@, @'
-   HZM            MMMM   
-'@, @'
-   FqM            MMMM   
-'@, @'
- __| ".        |\dS"qML  
-'@, @'
- |    `.       | `' \Zq  
-'@, @'
-_)      \.___.,|     .' 
-'@, @'
-\__     )      |   .'   
-'@, @'
-    `--'       `--' 
-'@
-} else {
-    [string[]] $art = @'
-        [91m,zz::A33tz;,[0m                   
-'@, @'
-        [91m@t:::EE333EE3[0m [92m.[0m                
-'@, @'
-       [91m;Et:::EE33EEE7[0m [92m@Ee.,     .,g[0m    
-'@, @'
-      [91m.St:::EE333EE3[0m [92m;EEEEEEttt333#[0m    
-'@, @'
-      [91m@t:::zE333EE3`[0m[92m.SEEEEEtttt33Q[0m     
-'@, @'
-     [91m:Et:::EE333EE7[0m [92m@EEEEEEtttt33F[0m     
-'@, @'
-     [91m@P*''``''*4Qj[0m [92m:EEEEEEtttt33@[0m      
-'@, @'
-    [94m,,::::33tz;,[0m [91m*[0m [92m@EEEEEEttz33Q7[0m      
-'@, @'
-   [94m;t::::ztttt33)[0m [93m.[0m [92m*4EEEjjjiP*[0m        
-'@, @'
-  [94m:tt::::ttttt33[0m [93m:E3s..[0m  [92m``[0m [93m,,g[0m        
-'@, @'
-  [94mit::::ztttt33F[0m [93mAEEEEEtttttE3F[0m        
-'@, @'
- [94m;t:::::tttt33V[0m [93m;EEEEEttttttt3[0m         
-'@, @'
- [94mft::::ztttt337[0m [93m@EEEEttttttt3F[0m         
-'@, @'
- [94m@P*''``''*4Qj[0m [93m;EEEEEtttttttZ`[0m         
-'@, @'
-             [94m`[0m [93mEEEEEtttttttj7[0m          
-'@, @'
-               [93m`^VEtjjjz>*`[0m            
-'@
-}
+# if ($unix) {
+#     [string[]]$art = @'
+#           _nnnn_         
+# '@, @'
+#          dGGGGMMb        
+# '@, @'
+#         @p~qp~~qMb       
+# '@, @'
+#         M|O||O) M|       
+# '@, @'
+#         @,----.JM|       
+# '@, @'
+#        JS^\__/  qKL      
+# '@, @'
+#      dZP        qKRb     
+# '@, @'
+#     dZP          qKKb    
+# '@, @'
+#    fZP            SMMb   
+# '@, @'
+#    HZM            MMMM   
+# '@, @'
+#    FqM            MMMM   
+# '@, @'
+#  __| ".        |\dS"qML  
+# '@, @'
+#  |    `.       | `' \Zq  
+# '@, @'
+# _)      \.___.,|     .' 
+# '@, @'
+# \__     )      |   .'   
+# '@, @'
+#     `--'       `--' 
+# '@
+# } else {
+#     [string[]] $art = @'
+#         [91m,zz::A33tz;,[0m                   
+# '@, @'
+#         [91m@t:::EE333EE3[0m [92m.[0m                
+# '@, @'
+#        [91m;Et:::EE33EEE7[0m [92m@Ee.,     .,g[0m    
+# '@, @'
+#       [91m.St:::EE333EE3[0m [92m;EEEEEEttt333#[0m    
+# '@, @'
+#       [91m@t:::zE333EE3`[0m[92m.SEEEEEtttt33Q[0m     
+# '@, @'
+#      [91m:Et:::EE333EE7[0m [92m@EEEEEEtttt33F[0m     
+# '@, @'
+#      [91m@P*''``''*4Qj[0m [92m:EEEEEEtttt33@[0m      
+# '@, @'
+#     [94m,,::::33tz;,[0m [91m*[0m [92m@EEEEEEttz33Q7[0m      
+# '@, @'
+#    [94m;t::::ztttt33)[0m [93m.[0m [92m*4EEEjjjiP*[0m        
+# '@, @'
+#   [94m:tt::::ttttt33[0m [93m:E3s..[0m  [92m``[0m [93m,,g[0m        
+# '@, @'
+#   [94mit::::ztttt33F[0m [93mAEEEEEtttttE3F[0m        
+# '@, @'
+#  [94m;t:::::tttt33V[0m [93m;EEEEEttttttt3[0m         
+# '@, @'
+#  [94mft::::ztttt337[0m [93m@EEEEttttttt3F[0m         
+# '@, @'
+#  [94m@P*''``''*4Qj[0m [93m;EEEEEtttttttZ`[0m         
+# '@, @'
+#              [94m`[0m [93mEEEEEtttttttj7[0m          
+# '@, @'
+#                [93m`^VEtjjjz>*`[0m            
+# '@
+# }
 
 # Currently unused macOS art
 <#
@@ -222,64 +235,69 @@ _)      \.___.,|     .'
 #>
 
 ####### Printing Output #########
-
+[string[]]$art = ""
 # Line 1 - HostName
-Write-Output "$($art[0]) [91m$Username[0m@[91m$Machine[0m"
+Write-Output "$($art[0]) [1;31mHost:[0m $Username[0m@[1;34m$Machine[0m"
 
 # Line 2 - OS
-Write-Output "$($art[1]) [91mOS:[0m $OS $BitVer"
+Write-Output "$($art[1]) [1;31mOS:[0m $OS $BitVer"
 
 # Line 3 - Kernel
-Write-Output "$($art[2]) [91mKernel:[0m $Kernel"
+Write-Output "$($art[2]) [1;31mKernel:[0m $Kernel"
 
 # Line 4 - Uptime
-Write-Output "$($art[3]) [91mUptime:[0m ${uptimeHours}h ${uptimeMinutes}m"
+# Write-Output "$($art[3]) [91mUptime:[0m ${uptimeHours}h ${uptimeMinutes}m"
 # .Days"d "$uptime.Hours"h " $uptime.Minutes"m " $uptime.Seconds"s " -Separator "";
 
 # Line 5 - Motherboard
-Write-Output "$($art[4]) [91mMotherboard:[0m $($Motherboard.Manufacturer -replace 'Micro-Star International Co., Ltd.', 'MSI') $($Motherboard.Product)"
+# Write-Output "$($art[4]) [91mMotherboard:[0m $($Motherboard.Manufacturer -replace 'Micro-Star International Co., Ltd.', 'MSI') $($Motherboard.Product)"
 
 # Line 6 - Shell (Hardcoded since it is unlikely anybody can run this without powershell)
-Write-Output "$($art[5]) [91mShell:[0m PowerShell $($PSVersionTable.PSVersion)"
+Write-Output "$($art[5]) [1;31mShell:[0m PowerShell $($PSVersionTable.PSVersion)"
 
 # Line 7 - Cmdlets
-Write-Output "$($art[6]) [91mCmdlets:[0m $cmdlets"
+# Write-Output "$($art[6]) [91mCmdlets:[0m $cmdlets"
 
 # Line 8 - Resolution (for primary monitor only)
-Write-Output "$($art[7]) [91mDisplay:[0m $MonitorNames ($($GPU.CurrentHorizontalResolution) x $($GPU.CurrentVerticalResolution) @ $($GPU.CurrentRefreshRate) Hz)"
+# Write-Output "$($art[7]) [91mDisplay:[0m $MonitorNames ($($GPU.CurrentHorizontalResolution) x $($GPU.CurrentVerticalResolution) @ $($GPU.CurrentRefreshRate) Hz)"
 
 # Line 9 - CPU
-Write-Output "$($art[8]) [91mCPU:[0m $CPU"
+Write-Output "$($art[8]) [1;34mCPU:[0m $CPU"
 
 # Line 10 - GPU
-Write-Output "$($art[9]) [91mGPU:[0m $($GPU.Name)"
+# Write-Output "$($art[9]) [91mGPU:[0m $($GPU.Name)"
 
 # Line 11 - Ram
-Write-Output "$($art[10]) [91mRAM:[0m $UsedRam MB / $TotalRam MB ([92m$UsedRamPercent%[0m)"
+Write-Output "$($art[10]) [1;34mRAM:[0m $UsedRam MB / $TotalRam MB ([92m$UsedRamPercent%[0m)"
 
 # Line 12 - Disk
-$i = 11
-foreach ($disk in $diskInfo) {
-    Write-Output "$($art[$i]) [91mDisk:[0m $($DISKINFO[11 - $i++])"
-}
+# $i = 11
+# foreach ($disk in $diskInfo) {
+#     Write-Output "$($art[$i]) [1;34mDisk:[0m $($DISKINFO[11 - $i++])"
+# }
 
-# Print empty Line to seperate colors
-Write-Output $art[$i++]
+Write-Output "$($art[12]) [1;32mChia:[0m $chia_version"
+Write-Output "$($art[13]) [1;32mChia-Dev-Tools:[0m $cdv_version"
 
-if (!$unix -and $Colors) {
-    foreach ($j in 40..48 + 100..107) {
-        [string]$sec = '[' + $j + 'm'
-        if ($j -eq 48) {
-            Write-Output "$($art[$i++]) $conColorLine"
-            $conColorLine = ''
-        } else {
-            $conColorLine += '' + $sec + '    [0m'
-        }
-    }
-    Write-Output "$($art[$i++]) $conColorLine"
-}
+# https://gist.github.com/JBlond/2fea43a3049b38287e5e9cefc87b2124
 
-# Print the remaining ascii artwork lines
-while ($i -lt $art.Count) {
-    Write-Output $art[$i++]
-}
+# # Print empty Line to seperate colors
+# Write-Output $art[$i++]
+
+# if (!$unix -and $Colors) {
+#     foreach ($j in 40..48 + 100..107) {
+#         [string]$sec = '[' + $j + 'm'
+#         if ($j -eq 48) {
+#             Write-Output "$($art[$i++]) $conColorLine"
+#             $conColorLine = ''
+#         } else {
+#             $conColorLine += '' + $sec + '    [0m'
+#         }
+#     }
+#     Write-Output "$($art[$i++]) $conColorLine"
+# }
+
+# # Print the remaining ascii artwork lines
+# while ($i -lt $art.Count) {
+#     Write-Output $art[$i++]
+# }
