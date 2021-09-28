@@ -1,6 +1,7 @@
 # powerfetch
 PowerShell-based cross-platform 'screenfetch'-like tool
 
+![Alt text](powerfetch-chia-screenshot.png?raw=true "Powerfetch with Chia screenshot")
 ![Alt text](screenshot.png?raw=true "sample Windows screenshot")
 
 ### Try it out!
